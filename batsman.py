@@ -6,10 +6,10 @@ This file describes the Batsman Class.
 
 
 class Batsman():
-    # Class variable keeping track of all batsmen
+    # Class variable describes all the batsmen (by name)
     batsmen = []
 
-    def __init__(self, name, team, order, runs, balls_faced):
+    def __init__(self, name, team, order, runs, balls_faced, out):
         self.name        = name
         '''
         Format will be [first_name]-[last_name]
@@ -18,6 +18,7 @@ class Batsman():
         self.order       = order
         self.runs        = runs
         self.balls_faced = balls_faced
+        self.out         = out
         if name not in batsmen:
             Batsman.batsmen.append(name)
 

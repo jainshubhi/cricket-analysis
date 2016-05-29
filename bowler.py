@@ -4,16 +4,18 @@
 This file describes the Bowler Class.
 '''
 
+
 class Bowler():
-    # This class variable describes all the bowlers
+    # Class variable describes all the bowlers (by name)
     bowlers = []
 
-    def __init__(self, name, team, runs, balls, wickets):
-        self.name    = name
-        self.team    = team
-        self.runs    = runs
-        self.balls   = balls
-        self.wickets = wickets
+    def __init__(self, name, bowler_type, team, runs, balls, wickets):
+        self.name        = name
+        self.bowler_type = bowler_type
+        self.team        = team
+        self.runs        = runs
+        self.balls       = balls
+        self.wickets     = wickets
         if name not in bowlers:
             bowlers.append(name)
 
