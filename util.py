@@ -1,5 +1,8 @@
 # Shubhi Jain
 # Cricket Analysis
+'''
+This file defines utility functions useful in the analysis of cricket matches.
+'''
 
 import pandas as pd, numpy as np
 import datetime
@@ -9,6 +12,31 @@ from models.ball import Ball
 from models.bowler import Bowler
 from models.batsman import Batsman
 
+# CONSTANTS
+PREV_BALL = ''
+
+
+def row_to_ball(row, match):
+    '''
+    This helper function defines a ball given a row of data
+    '''
+    innings       = row[1]['1']
+    over          = row[1]['Unnamed: 2']
+    batting_team  = row[1]['Unnamed: 3']
+    batsman       = row[1]['Unnamed: 4']
+    non_striker   = row[1]['Unnamed: 5']
+    bowler        = row[1]['Unnamed: 6']
+    batsman_runs  = int(row[1]['Unnamed: 7'])
+    extras        = int(row[1]['Unnamed: 8'])
+    method_of_out = row[1]['Unnamed: 9']
+    out_batsman   = row[1]['Unnamed: 10']
+    batsman = Batsman(batsman, batting_team)
+    non_striker = Batsman(non_striker, batting_team)
+    bowler = Bowler(bowler, '',
+                    match.team_1 if match.team_1 != batting_team
+                    else match.team_2)
+    return Ball(innings, over, batting_team, batsman, non_striker, bowler,
+                batsman_runs, extras, 0, method_of_out, out_batsman)
 
 def data_to_match(filename):
     match_data = pd.read_csv(filename)
@@ -40,9 +68,11 @@ def data_to_match(filename):
                   toss_winner, toss_decision, pom, umpire_1, umpire_2, umpire_r,
                   umpire_tv, match_ref, winner)
     # Get ball, batsmen, and bowler info
-    balls, batsmen = [], []
+    balls, batsmen, bowlers = [], [], []
     match_happenings = match_data[match_data['version'] == 'ball']
-    print match_happenings
+    for row in match_happenings.iterrows():
+        balls.append(row_to_ball(row, match))
+    print balls
 
 
 data_to_match('data/ipl_csv/335982.csv')
