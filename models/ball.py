@@ -11,7 +11,7 @@ from decimal import Decimal
 class Ball:
 
     def __init__(self, innings, over, batting_team, batsman, non_striker,
-                 bowler, batsman_runs, extras, try_count, method_of_out,
+                 bowler, batsman_runs, extras, method_of_out,
                  out_batsman, ball_length='', ball_width='', ball_type='',
                  ball_pace=0, method_of_extras=''):
         self.innings          = innings
@@ -25,13 +25,12 @@ class Ball:
         self.method_of_extras = method_of_extras
         '''
         The methods of extras:
-        - wide
-        - leg_bye
-        - bye
+        - wides
+        - legbyes
+        - byes
         - no_ball
         - penalty_runs
         '''
-        self.try_count        = try_count
         self.method_of_out    = method_of_out
         '''
         The methods to get out:

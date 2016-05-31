@@ -23,7 +23,7 @@ class Bowler():
         '''
         This function returns the economy of the bowler.
         '''
-        return runs / (float(balls) / 6)
+        return self.runs / (float(self.balls) / 6)
 
     def average(self):
         '''
@@ -44,4 +44,5 @@ class Bowler():
         return self
 
     def __repr__(self):
-        return '(Bowler %s of %s)' % (self.name, self.team)
+        return '(Bowler %s of %s with an economy of %f.)' % (self.name,
+                self.team, self.economy())

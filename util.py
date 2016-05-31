@@ -28,16 +28,19 @@ def balls_to_batsmen(balls):
         if ball.batsman.name not in BATSMEN.keys():
             # Get order
             ball.batsman.order = len(BATSMEN) + 1
+        else:
+            ball.batsman = BATSMEN[ball.batsman.name]
         # Get runs
         ball.batsman = ball.batsman.add_runs(ball.batsman_runs)
-        # One more ball faced!
-        ball.batsman = ball.batsman.add_balls_faced(1)
+        if ball.method_of_extras != 'wides':
+            # One more ball faced!
+            ball.batsman = ball.batsman.add_balls_faced(1)
         # Store updated batsman in OrderedDict
         BATSMEN[ball.batsman.name] = ball.batsman
         # Update non-striker as well
         if ball.non_striker.name in BATSMEN.keys():
             ball.non_striker = BATSMEN[ball.non_striker.name]
-    return balls, BATSMEN
+    return balls, BATSMEN.values()
 
 def balls_to_bowlers(balls):
     '''
@@ -45,15 +48,22 @@ def balls_to_bowlers(balls):
     '''
     BOWLERS = OrderedDict()
     for ball in balls:
-        # Add ball
-        ball.bowler = ball.bowler.add_balls()
+        # If not a new bowler
+        if ball.bowler.name in BOWLERS.keys():
+            ball.bowler = BOWLERS[ball.bowler.name]
         # Add runs if method of extras is bowler's fault
         if ball.method_of_extras == 'wides':
-            ball.bowler = ball.bowler.add_runs(extras)
+            ball.bowler = ball.bowler.add_runs(ball.extras)
+        else:
+            # Add ball
+            ball.bowler = ball.bowler.add_balls()
+        # Add wickets if exist
+        if ball.method_of_out and ball.method_of_out != 'run out':
+            ball.bowler = ball.bowler.add_wicket()
         # Add batsman_runs
         ball.bowler = ball.bowler.add_runs(ball.batsman_runs)
         BOWLERS[ball.bowler.name] = ball.bowler
-    return balls, BOWLERS
+    return balls, BOWLERS.values()
 
 def data_to_match(filename):
     '''
@@ -107,15 +117,12 @@ def data_to_match(filename):
                 if 'wicket' in d[1].keys():
                     method_of_out = d[1]['wicket']['kind']
                     out_batsman   = d[1]['wicket']['player_out']
-                    # Add wicket in bowler's wicket column
-                    if method_of_out != 'run out':
-                        bowler = bowler.add_wicket()
                 else:
                     method_of_out = None
                     out_batsman   = None
                 balls_1.append(Ball(1, over, batting_team, batsman, non_striker,
                                   bowler, batsman_runs, extras,
-                                  method_of_extras, 0, method_of_out,
+                                  method_of_extras, method_of_out,
                                   out_batsman))
         # 2nd innings ball information
         for delivery in match_data['innings'][1]['2nd innings']['deliveries']:
@@ -142,9 +149,6 @@ def data_to_match(filename):
                 if 'wicket' in d[1].keys():
                     method_of_out = d[1]['wicket']['kind']
                     out_batsman   = d[1]['wicket']['player_out']
-                    # Add wicket in bowler's wicket column
-                    if method_of_out != 'run out':
-                        bowler = bowler.add_wicket()
                 else:
                     method_of_out = None
                     out_batsman   = None
@@ -152,6 +156,7 @@ def data_to_match(filename):
                                   bowler, batsman_runs, extras,
                                   method_of_extras, 0, method_of_out,
                                   out_batsman))
+        # Get batter and bowler information now
         balls_1, batsmen_1 = balls_to_batsmen(balls_1)
         balls_2, batsmen_2 = balls_to_batsmen(balls_2)
         balls_1, bowlers_1 = balls_to_bowlers(balls_1)

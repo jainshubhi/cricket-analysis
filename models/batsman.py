@@ -26,7 +26,7 @@ class Batsman():
         '''
         This function returns the strike rate of the batsman.
         '''
-        return (float(runs) / balls_faced) * 100
+        return (float(self.runs) / self.balls_faced) * 100
 
     def add_runs(self, runs):
         self.runs += runs
