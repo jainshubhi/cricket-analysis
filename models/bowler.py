@@ -31,5 +31,17 @@ class Bowler():
         '''
         return 0
 
+    def add_wicket(self):
+        self.wickets += 1
+        return self
+
+    def add_runs(self, runs):
+        self.runs += runs
+        return self
+
+    def add_balls(self):
+        self.balls += 1
+        return self
+
     def __repr__(self):
         return '(Bowler %s of %s)' % (self.name, self.team)

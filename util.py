@@ -12,19 +12,48 @@ from models.ball import Over
 from models.bowler import Bowler
 from models.batsman import Batsman
 from pprint import pprint
+from collections import OrderedDict
 
 # CONSTANTS
 WIDE_EXTRAS = 0
-BATSMAN_1   = {'': 0}
-BATSMAN_2   = {'': 0}
 
-def balls_to_batsman(balls):
+
+def balls_to_batsmen(balls):
     '''
     This function adds batsman info to a list of balls given a list of balls.
     '''
-    for i in range(balls):
-        BATSMAN_1.set_defaults(balls.batsman, 0)
+    BATSMEN = OrderedDict()
+    for ball in balls:
+        # New batsman in the lineup
+        if ball.batsman.name not in BATSMEN.keys():
+            # Get order
+            ball.batsman.order = len(BATSMEN) + 1
+        # Get runs
+        ball.batsman = ball.batsman.add_runs(ball.batsman_runs)
+        # One more ball faced!
+        ball.batsman = ball.batsman.add_balls_faced(1)
+        # Store updated batsman in OrderedDict
+        BATSMEN[ball.batsman.name] = ball.batsman
+        # Update non-striker as well
+        if ball.non_striker.name in BATSMEN.keys():
+            ball.non_striker = BATSMEN[ball.non_striker.name]
+    return balls, BATSMEN
 
+def balls_to_bowlers(balls):
+    '''
+    This function adds bowler info to a list of balls given a list of balls
+    '''
+    BOWLERS = OrderedDict()
+    for ball in balls:
+        # Add ball
+        ball.bowler = ball.bowler.add_balls()
+        # Add runs if method of extras is bowler's fault
+        if ball.method_of_extras == 'wides':
+            ball.bowler = ball.bowler.add_runs(extras)
+        # Add batsman_runs
+        ball.bowler = ball.bowler.add_runs(ball.batsman_runs)
+        BOWLERS[ball.bowler.name] = ball.bowler
+    return balls, BOWLERS
 
 def data_to_match(filename):
     '''
@@ -52,14 +81,13 @@ def data_to_match(filename):
         umpire_1      = match_data['info']['umpires'][0]
         umpire_2      = match_data['info']['umpires'][1]
         winner        = match_data['info']['outcome']['winner']
-        balls = []
+        balls_1, balls_2 = [], []
         # 1st innings ball information
         for delivery in match_data['innings'][0]['1st innings']['deliveries']:
             for d in delivery.items():
                 over         = Over(str(d[0]))
                 batsman_runs = d[1]['runs']['batsman']
-                batsman      = Batsman(d[1]['batsman'], batting_team,
-                                       batsman_runs, balls_faced=1)
+                batsman      = Batsman(d[1]['batsman'], batting_team)
                 bowler       = Bowler(d[1]['bowler'], '', bowling_team)
                 extras       = d[1]['runs']['extras']
                 if extras > 0:
@@ -74,15 +102,18 @@ def data_to_match(filename):
                     over = over.prev()
                 if extras > 0 and method_of_extras == 'wides':
                     WIDE_EXTRAS += 1
-                non_striker = d[1]['non_striker']
+                non_striker = Batsman(d[1]['non_striker'], batting_team)
                 # If a wicket took place
                 if 'wicket' in d[1].keys():
                     method_of_out = d[1]['wicket']['kind']
                     out_batsman   = d[1]['wicket']['player_out']
+                    # Add wicket in bowler's wicket column
+                    if method_of_out != 'run out':
+                        bowler = bowler.add_wicket()
                 else:
                     method_of_out = None
                     out_batsman   = None
-                balls.append(Ball(1, over, batting_team, batsman, non_striker,
+                balls_1.append(Ball(1, over, batting_team, batsman, non_striker,
                                   bowler, batsman_runs, extras,
                                   method_of_extras, 0, method_of_out,
                                   out_batsman))
@@ -91,8 +122,7 @@ def data_to_match(filename):
             for d in delivery.items():
                 over         = Over(str(d[0]))
                 batsman_runs = d[1]['runs']['batsman']
-                batsman      = Batsman(d[1]['batsman'], bowling_team,
-                                       batsman_runs)
+                batsman      = Batsman(d[1]['batsman'], bowling_team)
                 bowler       = Bowler(d[1]['bowler'], '', batting_team)
                 extras       = d[1]['runs']['extras']
                 if extras > 0:
@@ -107,21 +137,27 @@ def data_to_match(filename):
                     over = over.prev()
                 if extras > 0 and method_of_extras == 'wides':
                     WIDE_EXTRAS += 1
-                non_striker = d[1]['non_striker']
+                non_striker = Batsman(d[1]['non_striker'], batting_team)
                 # If a wicket took place
                 if 'wicket' in d[1].keys():
                     method_of_out = d[1]['wicket']['kind']
                     out_batsman   = d[1]['wicket']['player_out']
+                    # Add wicket in bowler's wicket column
+                    if method_of_out != 'run out':
+                        bowler = bowler.add_wicket()
                 else:
                     method_of_out = None
                     out_batsman   = None
-                balls.append(Ball(1, over, batting_team, batsman, non_striker,
+                balls_2.append(Ball(1, over, batting_team, batsman, non_striker,
                                   bowler, batsman_runs, extras,
                                   method_of_extras, 0, method_of_out,
                                   out_batsman))
+        balls_1, batsmen_1 = balls_to_batsmen(balls_1)
+        balls_2, batsmen_2 = balls_to_batsmen(balls_2)
+        balls_1, bowlers_1 = balls_to_bowlers(balls_1)
+        balls_2, bowlers_2 = balls_to_bowlers(balls_2)
         return Match(team_1, team_2, season, date, comp, venue, city,
                      toss_winner, toss_decision, pom, umpire_1, umpire_2,
-                     winner, balls)
-
-
-print data_to_match('data/ipl/335982.yaml')
+                     winner, balls={batting_team:balls_1, bowling_team:balls_2},
+                     batsmen={batting_team:batsmen_1, bowling_team:batsmen_2},
+                     bowlers={batting_team:bowlers_2, bowling_team:bowlers_1})

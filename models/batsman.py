@@ -28,5 +28,14 @@ class Batsman():
         '''
         return (float(runs) / balls_faced) * 100
 
+    def add_runs(self, runs):
+        self.runs += runs
+        return self
+
+    def add_balls_faced(self, balls_faced):
+        self.balls_faced += balls_faced
+        return self
+
     def __repr__(self):
-        return '(Batsman %s of %s)' % (self.name, self.team)
+        return '(Batsman %s of %s has a strike rate of %f.)' % (self.name,
+                self.team, self.strike_rate())
