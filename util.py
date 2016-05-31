@@ -119,7 +119,9 @@ def data_to_match(filename):
                                   bowler, batsman_runs, extras,
                                   method_of_extras, 0, method_of_out,
                                   out_batsman))
-        pprint(balls)
+        return Match(team_1, team_2, season, date, comp, venue, city,
+                     toss_winner, toss_decision, pom, umpire_1, umpire_2,
+                     winner, balls)
 
 
-data_to_match('data/ipl/335982.yaml')
+print data_to_match('data/ipl/335982.yaml')
