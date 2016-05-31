@@ -4,6 +4,9 @@
 This file describes the Ball Class.
 '''
 
+from math import floor
+from decimal import Decimal
+
 
 class Ball:
 
@@ -87,10 +90,9 @@ class Ball:
 
 class Over:
 
-    def __init__(self, overall_over, ball, try_count=0):
-        self.overall_over = overall_over
-        self.ball         = ball
-        self.try_count    = try_count
+    def __init__(self, number):
+        self.overall_over = int(number.split('.')[0])
+        self.ball         = int(number.split('.')[1])
 
     def next(self):
         '''
@@ -98,31 +100,24 @@ class Over:
         '''
         if self.ball <= 5:
             self.ball += 1
-            self.try_count = 0
         else:
             self.overall_over += 1
             self.ball = 1
-            self.try_count = 0
+        return self
 
     def prev(self):
         '''
         This function defines how an over is defined for the previous ball.
         '''
-        if self.try_count == 0:
-            if self.ball > 1:
-                self.ball -= 1
-            else:
-                self.overall_over -= 1
-                self.ball = 6
+        if self.ball > 1:
+            self.ball -= 1
         else:
-            self.try_count -= 1
+            self.overall_over -= 1
+            self.ball = 6
         return self
 
     def first_ball(self):
         return self.ball == 1
 
     def __repr__(self):
-        if self.try_count == 0:
-            return '%d.%d' % (self.overall_over, self.ball)
-        else:
-            return '%d.%d.%d' % (self.overall_over, self.ball, self.try_count)
+        return '%d.%d' % (self.overall_over, self.ball)

@@ -9,7 +9,7 @@ class Match():
     def __init__(self, team_1, team_2, season, date, comp, match_num, venue,
                  city, toss_winner, toss_decision, pom, umpire_1, umpire_2,
                  umpire_r, umpire_tv, match_ref, winner, gender='male',
-                 balls=[], batsmen=[], match_type='ipl'):
+                 balls=[], match_type='ipl'):
         self.team_1        = team_1
         self.team_2        = team_2
         self.gender        = gender
@@ -30,8 +30,6 @@ class Match():
         self.winner        = winner
         # List of balls played throughought match
         self.balls         = balls
-        # List of batsmen played throughout match
-        self.batsmen       = batsmen
         self.match_type    = match_type
         '''
         The match types are:
